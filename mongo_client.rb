@@ -1,5 +1,5 @@
 require 'mongo'
-
+require 'pry'
 
 class MongoClient
 
@@ -9,13 +9,17 @@ class MongoClient
 
     end
 
+    def clear
+        @client[:posts].drop
+    end
+
     def import_csv(file)
         collection = @client[:posts]
         headers = nil
         docs = []
         File.open(file).each_line.with_index do |line, i|
             if i == 0
-                headers = line.split(',').map(&:to_sym)
+                headers = line.split(',').map(&:strip).map(&:to_sym)
             else
                 data = line.split(',')
                 doc = {}
@@ -29,8 +33,17 @@ class MongoClient
         result = collection.insert_many(docs)
         result.inserted_count
     end
+
+    def read_data
+        @client[:posts].find({})
+    end
     
 end
 
 mc = MongoClient.new(db: 'articles')
-puts mc.import_csv('./medium_data.txt')
+# mc.clear
+# puts mc.import_csv('./medium_data.txt')
+data = mc.read_data
+
+
+binding.pry
