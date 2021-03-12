@@ -1,0 +1,11 @@
+#!/bin/bash
+
+app="test-data-importer"
+network="voxpop-db"
+
+docker container stop ${app}
+docker container rm ${app}
+
+docker build -t ${app} .
+
+docker container run --name ${app} --network ${network} ${app}

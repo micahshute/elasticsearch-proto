@@ -1,11 +1,20 @@
 require 'mongo'
-require 'pry'
+# require 'pry'
 
 class MongoClient
 
+    attr_reader :client
 
     def initialize(db: )
-        @client = Mongo::Client.new(['127.0.0.1:27017'], database: db)
+        @client = Mongo::Client.new(
+            [
+                'voxpop-db1:27017',
+                'voxpop-db2:27017',
+                'voxpop-db3:27017'
+            ], 
+            database: db,
+            replica_set: 'voxpop-db-set'
+        )
 
     end
 
@@ -19,7 +28,7 @@ class MongoClient
         docs = []
         File.open(file).each_line.with_index do |line, i|
             if i == 0
-                headers = line.split(',').map(&:strip).map(&:to_sym)
+                headers = line.split(',').map(&:strip).map(&:downcase).map(&:to_sym)
             else
                 data = line.split(',')
                 doc = {}
@@ -40,10 +49,13 @@ class MongoClient
     
 end
 
-mc = MongoClient.new(db: 'articles')
+# binding.pry
+
+mc = MongoClient.new(db: 'voxpop_test')
+# binding.pry
 # mc.clear
-# puts mc.import_csv('./medium_data.txt')
-data = mc.read_data
+puts mc.import_csv('./medium_data.txt')
+# data = mc.read_data
 
 
-binding.pry
+# binding.pry

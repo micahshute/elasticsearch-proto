@@ -2,6 +2,10 @@ const express = require('express')
 
 const mongoose = require('mongoose')
 const mongoDB = "mongodb://localhost:27017/articles"
+const fetch = require('node-fetch')
+const bodyParser = require('body-parser')
+
+// const querystring = require('querystring')
 
 mongoose.connect(mongoDB, {
     useNewUrlParser: true,
@@ -12,6 +16,9 @@ const db = mongoose.connection
 db.on('error', console.error.bind(console, 'MongoDB connection error:'))
 
 const app =  express()
+app.use(bodyParser.urlencoded({ extended: false}))
+app.use(bodyParser.json())
+
 const port = 3000
 
 
@@ -25,7 +32,7 @@ app.get('/', (req, res) => {
 })
 
 app.get('/posts/sync', async (req, res) => {
-    const Post = mongoose.model('Post')
+    // const Post = mongoose.model('Post')
     let count = 0
     let sent = false
     console.log(count)
@@ -53,8 +60,20 @@ app.get('/posts/sync', async (req, res) => {
         }
     })
 
-
 })
+
+app.get('/posts/search', async (req, res) => {
+    const query = req.query.query
+    console.log(`Query: ${query}`)
+    const results = await fetch(`http://localhost:9200/posts/_search?q=${query}&from=0&size=${50}`)
+    const resultsObj = await results.json()
+    // res.json(resultsObj)
+    const ids = resultsObj.hits.hits.map(r => {
+        return r._id
+    })
+    res.json(ids)
+})
+
 
 
 app.get('/posts/:id', (req, res) => {
@@ -64,9 +83,15 @@ app.get('/posts/:id', (req, res) => {
         if(err){ return res.send(err)}
         // console.log(all_posts[0])
         post = all_posts[0]
-        res.send(`Tag: ${post.Tag}; TItle:${post.Title}\n\n\nBody:${post.Text}`)
+        res.json({
+            tag: post.Tag,
+            title: post.Title,
+            body: post.Text
+        })
+        // res.send(`Tag: ${post.Tag}; TItle:${post.Title}\n\n\nBody:${post.Text}`)
     })
 })
+
 
 
 

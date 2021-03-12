@@ -12,6 +12,7 @@
   "dependencies": {
     "express": "^4.17.1",
     "mongoosastic": "^4.6.0",
-    "mongoose": "^5.10.16"
+    "mongoose": "^5.10.16",
+    "node-fetch": "^2.6.1"
   }
 }
